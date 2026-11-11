@@ -15,9 +15,12 @@ def generate(system: str, user: str, temperature: float = 0.0) -> str:
             {"role": "user", "content": user},
         ],
         temperature=temperature,
-        max_tokens=800,
+        max_tokens=2000,
     )
-    return resp.choices[0].message.content
+    choice = resp.choices[0]
+    if choice.finish_reason == "length":
+        print("WARNING: LLM output was cut off (finish_reason=length)")
+    return choice.message.content or ""
 
 
 def clean_sql(text: str) -> str:

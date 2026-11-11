@@ -1,35 +1,23 @@
 import argparse
-from src.database.schema_extractor import get_all_tables
-from src.guardrails.sql_validator import validate_sql
-from src.database.executor import run_sql
-from src.database.schema_extractor import (
-    format_schema_for_prompt,
-    get_anchor_date,
-    get_database_schema,
-)
-from src.prompts.sql_writer import build_system_prompt
-from src.utils.llm import clean_sql, generate
+
+from src.pipeline import answer, get_system_prompt
 
 ap = argparse.ArgumentParser()
 ap.add_argument("question")
 ap.add_argument("--show-prompt", action="store_true")
 args = ap.parse_args()
 
-schema_text = format_schema_for_prompt(get_database_schema())
-system = build_system_prompt(schema_text, get_anchor_date())
 if args.show_prompt:
-    print(system)
+    print(get_system_prompt())
 
-sql = clean_sql(generate(system, args.question))
-print("SQL:\n", sql, "\n")
+res = answer(args.question)
+print("SQL:\n", res.sql, "\n")
+print("Steps:", " -> ".join(res.trace), "\n")
 
-check = validate_sql(sql, set(get_all_tables()))
-if not check.ok:
-    print("BLOCKED:", check.reason)
+if res.status == "out_of_scope":
+    print("OUT OF SCOPE:", res.error)
+elif res.df is not None:
+    print(f"{len(res.df)} rows")
+    print(res.df.head(20).to_string(index=False))
 else:
-    try:
-        df = run_sql(sql)
-        print(f"{len(df)} rows")
-        print(df.head(20).to_string(index=False))
-    except Exception as e:
-        print("SQL FAILED:", e)
+    print("FAILED:", res.error)

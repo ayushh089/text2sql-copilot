@@ -31,7 +31,8 @@ def validate_sql(sql: str, allowed_tables: set[str]) -> ValidationResult:
         return ValidationResult(
             False, f"Only SELECT queries are allowed, got {type(tree).__name__}"
         )
-
+    if tree.find(exp.Table) is None:
+        return ValidationResult(False, "Query does not read from any table")
     # WITH ... AS (...) ke naam asli tables nahi hote.
     cte_names = {cte.alias for cte in tree.find_all(exp.CTE)}
     allowed = {t.lower() for t in allowed_tables} | {c.lower() for c in cte_names}

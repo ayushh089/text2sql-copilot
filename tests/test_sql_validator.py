@@ -24,6 +24,9 @@ UNSAFE = [
     "",
     "   ",
     "hello world",
+        "SELECT NULL LIMIT 1",
+    "SELECT 1",
+    "SELECT 'Narendra Modi is the PM'",
 ]
 
 
