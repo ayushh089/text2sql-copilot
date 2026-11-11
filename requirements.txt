@@ -1,0 +1,16 @@
+groq
+dotenv
+langchain
+langchain-groq
+langgraph
+langchain-chroma
+chromadb
+pydantic
+python-dotenv
+pandas
+numpy
+sqlglot
+plotly
+streamlit
+pytest
+pathlib
